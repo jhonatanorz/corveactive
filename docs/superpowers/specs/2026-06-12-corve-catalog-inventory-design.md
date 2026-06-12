@@ -73,6 +73,7 @@ Core tables (Postgres / Supabase):
 - `id`, `customer_name`, `customer_whatsapp`, `delivery_note` (optional)
 - `status` (enum: `nuevo`, `confirmado`, `pagado`, `enviado`, `entregado`, `cancelado`)
 - `total` (MXN snapshot)
+- `stock_restored` (boolean — guards against restoring stock twice on cancel)
 - timestamps
 
 ### order_items
@@ -95,7 +96,7 @@ Core tables (Postgres / Supabase):
 
 ### stock_movements
 - `id`, `variant_id`, `delta` (signed int)
-- `type` (enum: `reabasto`, `pedido`, `correccion`)
+- `type` (enum: `reabasto`, `pedido`, `correccion`, `cancelacion`)
 - `reference` (e.g. `OC-11`, `#104`), `reason` (free text for corrections)
 - timestamp
 - (the audit log behind both inventory history and restocks)
@@ -125,6 +126,7 @@ Behind login. Warm CORVE feel but optimized for speed. Sidebar nav: **Pedidos ·
 ### 6.1 Pedidos (orders)
 - List of incoming orders, newest first; new orders highlighted with a count badge.
 - Order detail: items, customer + tappable WhatsApp, and status transitions (`nuevo → confirmado → pagado → enviado → entregado`, or `cancelado`).
+- **Cancelar pedido** action (with confirmation), available from any non-final state including `pagado` and `enviado`. Cancelling restores stock (see §7) and removes the order from sales. Cancelled orders remain visible in the list, clearly marked.
 
 ### 6.2 Productos
 - List + create/edit: name, line, type, description, **price + cost → live margin (amount + %)**, status (draft/active/hidden), images.
@@ -155,6 +157,7 @@ Behind login. Warm CORVE feel but optimized for speed. Sidebar nav: **Pedidos ·
 ## 7. Key business logic
 
 - **Stock decrement on order**: when an order is submitted, each variant's stock decreases and a `pedido` movement is logged. Checkout re-checks stock to prevent overselling the last unit; if a variant went out of stock mid-session, the customer is told before submitting.
+- **Cancellation restores stock**: cancelling an order sets status `cancelado` and, if `stock_restored` is false, adds each `order_item.qty` back to its variant, logs a `cancelacion` movement (positive delta, reference = order #) per variant, and sets `stock_restored = true`. The guard prevents double restoration. Because a cancelled order is no longer `pagado`, it automatically drops out of revenue, units, and profit.
 - **PO receiving** is the source of restocks (see 6.4) and the source of cost updates.
 - **Margin & profit** derive from `product.cost` vs `price` / `unit_price`. Sales profit uses the cost at time of reporting (current product cost) — acceptable for v1; can snapshot cost per order_item later if needed.
 - **Sale definition**: revenue/units/profit count orders at `pagado` or beyond, not `nuevo`/`cancelado`.
@@ -167,7 +170,7 @@ Behind login. Warm CORVE feel but optimized for speed. Sidebar nav: **Pedidos ·
 - **Language & money** — Spanish UI, MXN formatting, all product/marketing copy follows CORVE voice rules.
 - **Images** — Supabase Storage, served optimized (Next/Image) so immersive covers load fast on phones.
 - **Error handling** — checkout stock re-check; friendly form validation; thoughtful empty states (empty cart, line with no products, no orders yet).
-- **Testing (TDD)** — unit tests for cart totals, margin/profit math, stock-decrement and PO-receive logic; integration tests that placing an order decrements stock + logs a movement, that receiving a PO increases stock + updates cost + logs movements, and that marking *pagado* records a sale; one end-to-end test for the checkout happy path.
+- **Testing (TDD)** — unit tests for cart totals, margin/profit math, stock-decrement and PO-receive logic; integration tests that placing an order decrements stock + logs a movement, that receiving a PO increases stock + updates cost + logs movements, that marking *pagado* records a sale, and that cancelling an order restores stock exactly once + drops it from sales; one end-to-end test for the checkout happy path.
 - **Deployment** — Vercel + Supabase with environment variables; optional custom domain.
 
 ---
