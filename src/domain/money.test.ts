@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatMXN, pesos } from "@/domain/money";
+import { formatMXN, pesos, parsePesosInput } from "@/domain/money";
 
 describe("pesos", () => {
   it("converts whole pesos to centavos", () => {
@@ -26,5 +26,29 @@ describe("formatMXN", () => {
 
   it("formats sub-peso centavos", () => {
     expect(formatMXN(69050)).toBe("$690.50");
+  });
+});
+
+describe("parsePesosInput", () => {
+  it("parses whole pesos", () => {
+    expect(parsePesosInput("690")).toBe(69000);
+  });
+  it("parses pesos with two decimals", () => {
+    expect(parsePesosInput("690.50")).toBe(69050);
+  });
+  it("trims surrounding whitespace and a leading $", () => {
+    expect(parsePesosInput(" $1,040.00 ")).toBe(104000);
+  });
+  it("returns null for empty input", () => {
+    expect(parsePesosInput("")).toBeNull();
+  });
+  it("returns null for non-numeric input", () => {
+    expect(parsePesosInput("abc")).toBeNull();
+  });
+  it("returns null for negative input", () => {
+    expect(parsePesosInput("-5")).toBeNull();
+  });
+  it("rounds more than two decimals to the nearest centavo", () => {
+    expect(parsePesosInput("10.005")).toBe(1001);
   });
 });
