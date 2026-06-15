@@ -115,6 +115,27 @@ git commit -m "chore(db): local Supabase stack config, seed user and bucket"
 
 ---
 
+## Task 1b: RLS policies & grants migration
+
+**Files:** Create `supabase/migrations/0002_rls.sql`. (Added during execution: without RLS policies *and* table grants, even the authenticated admin gets "permission denied" — surfaced by Task 1's connectivity check.)
+
+- [ ] **Step 1: Write the migration**
+
+Create `supabase/migrations/0002_rls.sql` that: grants `usage` on schema public to anon/authenticated; grants `select,insert,update,delete` on all public tables to authenticated; enables RLS on all 9 app tables; adds an `admin_all` policy (`for all to authenticated using(true) with check(true)`) on each; and adds storage.objects policies so authenticated manages and public reads the `product-images` bucket. (anon catalog-read + order-insert policies are deferred to Plan 3.)
+
+- [ ] **Step 2: Apply and verify**
+
+Run `npx supabase db reset` (re-applies 0001 + 0002 + seed). Then verify with a script that: confirms the bucket exists, creates the admin user via the Auth Admin API, confirms **anon is denied** `products` (RLS on), and confirms an **authenticated** session can insert + select `products`. All must pass.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add supabase/migrations/0002_rls.sql
+git commit -m "feat(db): RLS policies and grants for admin access"
+```
+
+---
+
 ## Task 2: Database Row types
 
 **Files:** Create `src/lib/db-types.ts`.
