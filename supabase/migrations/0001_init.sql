@@ -62,7 +62,8 @@ create table purchase_order_items (
   variant_id   uuid not null references variants(id) on delete restrict,
   qty_ordered  integer not null,
   qty_received integer not null default 0,
-  unit_cost    integer not null            -- centavos
+  unit_cost    integer not null,           -- centavos
+  unique (po_id, variant_id)               -- one line per variant per PO (receiving keys by variant)
 );
 
 create table orders (
