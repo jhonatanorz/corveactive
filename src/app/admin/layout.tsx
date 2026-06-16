@@ -10,6 +10,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/pedidos" className="block py-2">Pedidos</Link>
           <Link href="/admin/products" className="block py-2">Productos</Link>
           <Link href="/admin/inventory" className="block py-2">Inventario</Link>
+          <Link href="/admin/compras" className="block py-2">Compras</Link>
+          <Link href="/admin/ventas" className="block py-2">Ventas</Link>
+          <Link href="/admin/proveedores" className="block py-2">Proveedores</Link>
         </nav>
         <form action={signOut}>
           <button className="text-left py-2 text-[#a89c8e]">Cerrar sesión</button>
