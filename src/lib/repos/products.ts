@@ -67,16 +67,37 @@ export async function listImages(productId: string): Promise<ProductImageRow[]> 
   return data as ProductImageRow[];
 }
 
-/** Upload a file to the public product-images bucket and record it. */
-export async function addProductImage(productId: string, file: File): Promise<void> {
+/** Upload a product image, optionally tagged with a color (null = default). One image
+ *  per (product, color): any existing image for that color is removed first. */
+export async function addProductImage(productId: string, file: File, color: string | null = null): Promise<void> {
   const supabase = await createClient();
+
+  // remove existing image(s) for this (product, color), incl. best-effort storage cleanup
+  const base = supabase.from("product_images").select("id,url").eq("product_id", productId);
+  const { data: existing } = await (color === null ? base.is("color", null) : base.eq("color", color));
+  for (const row of (existing ?? []) as { id: string; url: string }[]) {
+    const path = row.url.split("/product-images/")[1];
+    if (path) await supabase.storage.from("product-images").remove([decodeURIComponent(path)]);
+    await supabase.from("product_images").delete().eq("id", row.id);
+  }
+
   const path = `products/${productId}/${Date.now()}-${file.name}`;
   const { error: upErr } = await supabase.storage.from("product-images").upload(path, file);
   if (upErr) throw upErr;
   const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
-  const { count } = await supabase
-    .from("product_images").select("id", { count: "exact", head: true }).eq("product_id", productId);
   const { error } = await supabase.from("product_images")
-    .insert({ product_id: productId, url: pub.publicUrl, sort_order: count ?? 0 });
+    .insert({ product_id: productId, url: pub.publicUrl, sort_order: 0, color });
+  if (error) throw error;
+}
+
+/** Delete a product image (DB row + best-effort storage object). */
+export async function deleteProductImage(imageId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: row } = await supabase.from("product_images").select("url").eq("id", imageId).maybeSingle();
+  if (row) {
+    const path = (row as { url: string }).url.split("/product-images/")[1];
+    if (path) await supabase.storage.from("product-images").remove([decodeURIComponent(path)]);
+  }
+  const { error } = await supabase.from("product_images").delete().eq("id", imageId);
   if (error) throw error;
 }
