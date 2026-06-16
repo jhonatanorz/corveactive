@@ -1,6 +1,5 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { restoreStock } from "@/domain/stock";
 import type { OrderStatus } from "@/domain/types";
 
 export interface PlaceOrderInput {
@@ -66,33 +65,12 @@ export async function setOrderStatus(id: string, status: OrderStatus): Promise<v
 }
 
 /**
- * Cancel an order: set status 'cancelado' and restore each item's stock exactly once
- * (guarded by stock_restored), logging a 'cancelacion' movement per variant.
+ * Cancel an order via the atomic cancel_order RPC: in one transaction it restores
+ * each item's stock exactly once (guarded by stock_restored), logs a 'cancelacion'
+ * movement per variant, and sets status 'cancelado'. Idempotent — a retry is a no-op.
  */
 export async function cancelOrder(id: string): Promise<void> {
   const supabase = await createClient();
-  const { data: order, error } = await supabase
-    .from("orders").select("id, stock_restored").eq("id", id).single();
+  const { error } = await supabase.rpc("cancel_order", { p_order_id: id });
   if (error) throw error;
-
-  if (!(order as { stock_restored: boolean }).stock_restored) {
-    const { data: items, error: iErr } = await supabase
-      .from("order_items").select("variant_id, qty").eq("order_id", id).not("variant_id", "is", null);
-    if (iErr) throw iErr;
-    for (const it of (items ?? []) as { variant_id: string; qty: number }[]) {
-      const { data: v, error: vErr } = await supabase
-        .from("variants").select("stock").eq("id", it.variant_id).single();
-      if (vErr) throw vErr;
-      const newStock = restoreStock((v as { stock: number }).stock, it.qty);
-      const { error: upErr } = await supabase.from("variants").update({ stock: newStock }).eq("id", it.variant_id);
-      if (upErr) throw upErr;
-      const { error: mvErr } = await supabase.from("stock_movements").insert({
-        variant_id: it.variant_id, delta: it.qty, type: "cancelacion", reference: `#${id.slice(0, 8)}`,
-      });
-      if (mvErr) throw mvErr;
-    }
-  }
-  const { error: stErr } = await supabase
-    .from("orders").update({ status: "cancelado", stock_restored: true }).eq("id", id);
-  if (stErr) throw stErr;
 }
