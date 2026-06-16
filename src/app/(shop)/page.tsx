@@ -1,6 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { listActiveByLine } from "@/lib/repos/catalog";
 import { formatMXN } from "@/domain/money";
+import { pickProductImage } from "@/domain/product-image";
 import type { Line } from "@/domain/types";
 
 const LINES: { line: Line; title: string; message: string }[] = [
@@ -23,13 +25,18 @@ export default async function CatalogPage() {
             <p className="italic opacity-80 mt-1">{s.message}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 p-4">
-            {s.products.map((p) => (
-              <Link key={p.id} href={`/producto/${p.id}`} className="block">
-                <div className="h-44 rounded-lg bg-gradient-to-br from-[#d8c1ad] to-[#9a7a61]" />
-                <div className="text-sm mt-2">{p.name}</div>
-                <div className="text-sm opacity-70">{formatMXN(p.price)}</div>
-              </Link>
-            ))}
+            {s.products.map((p) => {
+              const url = pickProductImage(p.product_images.map((i) => ({ url: i.url, color: i.color })), null);
+              return (
+                <Link key={p.id} href={`/producto/${p.id}`} className="block">
+                  <div className="relative h-44 rounded-lg overflow-hidden bg-gradient-to-br from-[#d8c1ad] to-[#9a7a61]">
+                    {url && <Image src={url} alt={p.name} fill sizes="50vw" className="object-cover" />}
+                  </div>
+                  <div className="text-sm mt-2">{p.name}</div>
+                  <div className="text-sm opacity-70">{formatMXN(p.price)}</div>
+                </Link>
+              );
+            })}
             {s.products.length === 0 && <p className="opacity-60 text-sm">Pronto.</p>}
           </div>
         </section>
