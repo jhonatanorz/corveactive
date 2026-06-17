@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { ProductRow } from "@/lib/db-types";
+import { Button, inputClass } from "@/components/ui";
 
 type Props = {
   product: Pick<ProductRow, "name" | "line" | "type" | "description" | "price" | "cost" | "status"> | null;
@@ -15,43 +16,43 @@ export default function ProductForm({ product, action }: Props) {
   const e = state?.errors ?? {};
   return (
     <form action={formAction} className="max-w-md space-y-3 p-6 text-sm">
-      <h1 className="text-lg font-bold">{product ? "Editar producto" : "Nuevo producto"}</h1>
+      <h1 className="text-lg font-bold text-ink">{product ? "Editar producto" : "Nuevo producto"}</h1>
 
-      <label className="block">Nombre
-        <input name="name" defaultValue={product?.name ?? ""} className="w-full rounded border border-[#d8cdc0] p-2" />
+      <label className="block text-ink-2">Nombre
+        <input name="name" defaultValue={product?.name ?? ""} className={inputClass} />
         {e.name && <span className="text-red-600 text-xs">{e.name}</span>}
       </label>
 
-      <label className="block">Línea
-        <select name="line" defaultValue={product?.line ?? "MOVE"} className="w-full rounded border border-[#d8cdc0] p-2">
+      <label className="block text-ink-2">Línea
+        <select name="line" defaultValue={product?.line ?? "MOVE"} className={inputClass}>
           <option value="MOVE">CORVE MOVE</option>
           <option value="HIM">CORVE HIM</option>
         </select>
         {e.line && <span className="text-red-600 text-xs">{e.line}</span>}
       </label>
 
-      <label className="block">Tipo
-        <input name="type" defaultValue={product?.type ?? ""} className="w-full rounded border border-[#d8cdc0] p-2" />
+      <label className="block text-ink-2">Tipo
+        <input name="type" defaultValue={product?.type ?? ""} className={inputClass} />
         {e.type && <span className="text-red-600 text-xs">{e.type}</span>}
       </label>
 
-      <label className="block">Descripción
-        <textarea name="description" defaultValue={product?.description ?? ""} className="w-full rounded border border-[#d8cdc0] p-2" />
+      <label className="block text-ink-2">Descripción
+        <textarea name="description" defaultValue={product?.description ?? ""} className={inputClass} />
       </label>
 
       <div className="flex gap-3">
-        <label className="block flex-1">Precio (MXN)
-          <input name="price" defaultValue={product ? peso(product.price) : ""} className="w-full rounded border border-[#d8cdc0] p-2" />
+        <label className="block flex-1 text-ink-2">Precio (MXN)
+          <input name="price" defaultValue={product ? peso(product.price) : ""} className={inputClass} />
           {e.price && <span className="text-red-600 text-xs">{e.price}</span>}
         </label>
-        <label className="block flex-1">Costo (MXN)
-          <input name="cost" defaultValue={product ? peso(product.cost) : ""} className="w-full rounded border border-[#d8cdc0] p-2" />
+        <label className="block flex-1 text-ink-2">Costo (MXN)
+          <input name="cost" defaultValue={product ? peso(product.cost) : ""} className={inputClass} />
           {e.cost && <span className="text-red-600 text-xs">{e.cost}</span>}
         </label>
       </div>
 
-      <label className="block">Estado
-        <select name="status" defaultValue={product?.status ?? "draft"} className="w-full rounded border border-[#d8cdc0] p-2">
+      <label className="block text-ink-2">Estado
+        <select name="status" defaultValue={product?.status ?? "draft"} className={inputClass}>
           <option value="draft">Borrador</option>
           <option value="active">Activa</option>
           <option value="hidden">Oculta</option>
@@ -59,9 +60,9 @@ export default function ProductForm({ product, action }: Props) {
         {e.status && <span className="text-red-600 text-xs">{e.status}</span>}
       </label>
 
-      <button type="submit" disabled={pending} className="rounded bg-[#211d1a] text-white px-4 py-2 disabled:opacity-60">
+      <Button type="submit" disabled={pending} variant="primary" size="md">
         {pending ? "Guardando…" : "Guardar"}
-      </button>
+      </Button>
     </form>
   );
 }
