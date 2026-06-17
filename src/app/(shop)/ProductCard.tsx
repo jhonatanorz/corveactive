@@ -26,6 +26,10 @@ export default function ProductCard({ id, name, price, images, colors }: Props) 
           <FadeImage src={url} alt={name} sizes="(min-width:1024px) 25vw, (min-width:768px) 33vw, 50vw" />
         </Card>
       </Link>
+      <Link href={`/producto/${id}`} className="block">
+        <div className="text-sm mt-2 text-ink">{name}</div>
+        <div className="text-sm text-ink-2">{formatMXN(price)}</div>
+      </Link>
       {colors.length > 0 && (
         <div className="flex gap-1.5 mt-2">
           {colors.map((c) => (
@@ -40,10 +44,6 @@ export default function ProductCard({ id, name, price, images, colors }: Props) 
           ))}
         </div>
       )}
-      <Link href={`/producto/${id}`} className="block">
-        <div className="text-sm mt-2 text-ink">{name}</div>
-        <div className="text-sm text-ink-2">{formatMXN(price)}</div>
-      </Link>
     </div>
   );
 }
