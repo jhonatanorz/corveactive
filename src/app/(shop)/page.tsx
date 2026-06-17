@@ -21,7 +21,7 @@ export default async function CatalogPage() {
             <Blob fill="periwinkle" className="absolute -top-16 -right-10 w-72 h-72 opacity-80" />
             <div className="relative">
               <Eyebrow className="text-periwinkle-2 mb-2">CORVE {s.line}</Eyebrow>
-              <h2 className="font-display text-5xl leading-none text-lime">{s.title}</h2>
+              <h2 className="font-display font-bold text-5xl leading-none text-lime">{s.title}</h2>
               <p className="italic opacity-80 mt-2">{s.message}</p>
             </div>
           </div>
