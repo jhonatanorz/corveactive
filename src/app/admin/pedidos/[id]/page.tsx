@@ -32,7 +32,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       {order.status !== "cancelado" && (
         <>
-          <form action={changeStatus.bind(null, id)} className="mt-3 flex gap-2">
+          <form action={changeStatus.bind(null, id)} className="mt-3 flex flex-wrap gap-2">
             <select name="status" defaultValue={order.status} className="rounded-sm border border-line bg-white p-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-royal/40">
               {FLOW.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>

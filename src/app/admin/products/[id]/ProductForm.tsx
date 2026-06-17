@@ -40,7 +40,7 @@ export default function ProductForm({ product, action }: Props) {
         <textarea name="description" defaultValue={product?.description ?? ""} className={inputClass} />
       </label>
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <label className="block flex-1 text-ink-2">Precio (MXN)
           <input name="price" defaultValue={product ? peso(product.price) : ""} className={inputClass} />
           {e.price && <span className="text-red-600 text-xs">{e.price}</span>}

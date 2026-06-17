@@ -12,9 +12,10 @@ export default async function InventoryPage() {
   const rows = (variants ?? []) as (VariantRow & { products: { name: string } | null })[];
 
   return (
-    <div className="p-6 grid grid-cols-2 gap-8 text-sm">
+    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
       <div>
         <h1 className="text-lg font-bold mb-3 text-ink">Inventario</h1>
+        <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="text-left"><tr><th><Eyebrow>Variante</Eyebrow></th><th><Eyebrow>Stock</Eyebrow></th></tr></thead>
           <tbody>
@@ -27,6 +28,7 @@ export default async function InventoryPage() {
             {rows.length === 0 && <tr><td colSpan={2} className="py-4 text-ink-3">Sin variantes.</td></tr>}
           </tbody>
         </table>
+        </div>
       </div>
       <div>
         <h2 className="text-lg font-bold mb-3 text-ink">Movimientos</h2>

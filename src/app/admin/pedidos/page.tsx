@@ -8,6 +8,7 @@ export default async function PedidosPage() {
   return (
     <div className="p-6">
       <h1 className="text-lg font-bold mb-4 text-ink">Pedidos</h1>
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-left text-xs">
           <tr>
@@ -36,6 +37,7 @@ export default async function PedidosPage() {
           {orders.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-ink-3">Sin pedidos aún.</td></tr>}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

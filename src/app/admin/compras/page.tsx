@@ -12,6 +12,7 @@ export default async function ComprasPage() {
         <h1 className="text-lg font-bold text-ink">Órdenes de compra</h1>
         <form action={newOrder}><Button type="submit" variant="primary" size="sm">+ Nueva orden</Button></form>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-left text-xs">
           <tr>
@@ -40,6 +41,7 @@ export default async function ComprasPage() {
           {pos.length === 0 && <tr><td colSpan={5} className="py-6 text-center text-ink-3">Sin órdenes aún.</td></tr>}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

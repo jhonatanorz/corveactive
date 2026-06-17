@@ -14,18 +14,18 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
   return (
     <div className="p-6 max-w-2xl text-sm">
       <h1 className="text-lg font-bold mb-3 text-ink">Ventas</h1>
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <Link href="/admin/ventas" className={`${buttonClass("primary", "sm")} ${!sp.line ? "" : "opacity-50"} rounded-pill`}>Todo</Link>
         <Link href={link({ line: "MOVE" })} className={`${buttonClass("primary", "sm")} ${sp.line === "MOVE" ? "" : "opacity-50"} rounded-pill`}>MOVE</Link>
         <Link href={link({ line: "HIM" })} className={`${buttonClass("primary", "sm")} ${sp.line === "HIM" ? "" : "opacity-50"} rounded-pill`}>HIM</Link>
       </div>
-      <form className="flex gap-2 mb-4 items-end">
+      <form className="flex flex-wrap gap-2 mb-4 items-end">
         <label className="text-xs text-ink-2">Desde<input name="from" type="date" defaultValue={sp.from} className="block rounded-sm border border-line bg-white p-2 text-sm text-ink" /></label>
         <label className="text-xs text-ink-2">Hasta<input name="to" type="date" defaultValue={sp.to} className="block rounded-sm border border-line bg-white p-2 text-sm text-ink" /></label>
         {sp.line && <input type="hidden" name="line" value={sp.line} />}
         <Button type="submit" variant="primary" size="sm">Filtrar</Button>
       </form>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <Card className="p-4">
           <Eyebrow>Ingresos</Eyebrow>
           <div className="text-2xl font-bold text-ink">{formatMXN(summary.revenue)}</div>

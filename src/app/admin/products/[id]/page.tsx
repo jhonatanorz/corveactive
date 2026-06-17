@@ -38,7 +38,7 @@ export default async function ProductEditorPage({
           </div>
 
           {/* Upload form */}
-          <form action={uploadImage.bind(null, id)} className="mb-4 flex gap-2 items-center">
+          <form action={uploadImage.bind(null, id)} className="mb-4 flex flex-wrap gap-2 items-center">
             <input type="file" name="image" accept="image/*" className="text-xs" />
             <select name="color" className={inputClass + " !w-auto text-xs py-1 px-2"}>
               <option value="">Default (todas)</option>
@@ -51,7 +51,7 @@ export default async function ProductEditorPage({
           <Eyebrow className="mb-2">Variantes (color × talla)</Eyebrow>
           <ul className="space-y-1">
             {variants.map((v) => (
-              <li key={v.id} className="flex items-center gap-2">
+              <li key={v.id} className="flex flex-wrap items-center gap-2">
                 <span className="flex-1 text-ink">{v.color} · {v.size}</span>
                 <span className="text-ink-2">stock {v.stock}</span>
                 <form action={correctVariant.bind(null, id)} className="flex gap-1">

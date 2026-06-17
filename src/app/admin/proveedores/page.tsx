@@ -15,7 +15,7 @@ export default async function ProveedoresPage() {
         ))}
         {suppliers.length === 0 && <li className="text-ink-3">Sin proveedores aún.</li>}
       </ul>
-      <form action={addSupplier} className="flex gap-2">
+      <form action={addSupplier} className="flex flex-wrap gap-2">
         <input name="name" placeholder="Nombre" className="flex-1 rounded-sm border border-line bg-white p-2 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
         <input name="contact" placeholder="Contacto" className="flex-1 rounded-sm border border-line bg-white p-2 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40" />
         <Button type="submit" variant="primary">+ Proveedor</Button>

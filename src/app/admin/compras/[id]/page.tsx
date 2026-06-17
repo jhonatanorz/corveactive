@@ -18,7 +18,7 @@ export default async function POEditorPage({ params }: { params: Promise<{ id: s
     <div className="p-6 max-w-2xl text-sm">
       <h1 className="text-lg font-bold text-ink">OC-{id.slice(0, 8)} <span className="text-xs font-normal text-ink-2">· {po.status}</span></h1>
 
-      <form action={chooseSupplier.bind(null, id)} className="flex gap-2 mt-3">
+      <form action={chooseSupplier.bind(null, id)} className="flex flex-wrap gap-2 mt-3">
         <select name="supplier_id" defaultValue={po.supplier_id ?? ""} className="rounded-sm border border-line bg-white p-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-royal/40">
           <option value="">— Proveedor —</option>
           {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -26,6 +26,7 @@ export default async function POEditorPage({ params }: { params: Promise<{ id: s
         <Button type="submit" variant="primary">Guardar proveedor</Button>
       </form>
 
+      <div className="overflow-x-auto">
       <table className="w-full mt-4">
         <thead className="text-left text-xs">
           <tr>
@@ -47,6 +48,7 @@ export default async function POEditorPage({ params }: { params: Promise<{ id: s
           {items.length === 0 && <tr><td colSpan={4} className="py-3 text-ink-3">Sin líneas.</td></tr>}
         </tbody>
       </table>
+      </div>
       <div className="flex justify-between font-semibold mt-2 text-ink"><span>Total</span><span>{formatMXN(po.total_cost)}</span></div>
 
       {editable && (
@@ -65,7 +67,7 @@ export default async function POEditorPage({ params }: { params: Promise<{ id: s
         <form action={receive.bind(null, id)} className="mt-6 border-t border-line pt-4">
           <h2 className="font-semibold mb-2 text-ink">Recibir</h2>
           {items.map((it) => (
-            <div key={it.id} className="flex items-center gap-2 mb-1">
+            <div key={it.id} className="flex flex-wrap items-center gap-2 mb-1">
               <span className="flex-1 text-ink">{it.variants.products.name} · {it.variants.color} · {it.variants.size} (faltan {it.qty_ordered - it.qty_received})</span>
               <input name={`received_${it.variant_id}`} type="number" min="0" max={it.qty_ordered - it.qty_received} defaultValue="0"
                 className="w-20 rounded-sm border border-line bg-white p-1 text-sm text-ink" />

@@ -14,6 +14,7 @@ export default async function ProductsPage() {
           + Nuevo producto
         </Link>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead className="text-left text-xs">
           <tr>
@@ -42,6 +43,7 @@ export default async function ProductsPage() {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
