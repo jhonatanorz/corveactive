@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/CartContext";
+import { buttonClass } from "@/components/ui";
 
 export default function CartPill() {
   const { count } = useCart();
   return (
-    <Link href="/carrito" className="rounded-full bg-white/90 text-[#161311] text-xs px-3 py-1">
+    <Link href="/carrito" className={buttonClass("primary", "sm")}>
       🛍 {count}
     </Link>
   );

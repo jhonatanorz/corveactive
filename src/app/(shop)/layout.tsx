@@ -1,13 +1,13 @@
-import Link from "next/link";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { Wordmark } from "@/components/ui";
 import CartPill from "./CartPill";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
     <CartProvider>
-      <div className="min-h-screen bg-[#161311] text-[#f4efe9]">
-        <header className="flex items-center justify-between px-5 py-4">
-          <Link href="/" className="tracking-[0.3em] text-sm">C O R V E</Link>
+      <div className="min-h-screen bg-white text-ink">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-line">
+          <Wordmark className="text-2xl" />
           <CartPill />
         </header>
         {children}
