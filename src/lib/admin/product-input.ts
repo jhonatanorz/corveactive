@@ -10,7 +10,6 @@ export interface ProductPayload {
   type: string;
   description: string;
   price: Centavos;
-  cost: Centavos;
   status: ProductStatus;
 }
 
@@ -37,10 +36,6 @@ export function validateProductInput(raw: Record<string, string>): ValidationRes
   const price = parsePesosInput(raw.price ?? "");
   if (price === null) errors.price = "Precio inválido";
 
-  const costRaw = (raw.cost ?? "").trim();
-  const cost = costRaw === "" ? 0 : parsePesosInput(costRaw);
-  if (cost === null) errors.cost = "Costo inválido";
-
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   return {
@@ -51,7 +46,6 @@ export function validateProductInput(raw: Record<string, string>): ValidationRes
       type,
       description: (raw.description ?? "").trim(),
       price: price as Centavos,
-      cost: cost as Centavos,
       status,
     },
   };

@@ -5,7 +5,7 @@ import type { ProductRow } from "@/lib/db-types";
 import { Button, inputClass } from "@/components/ui";
 
 type Props = {
-  product: Pick<ProductRow, "name" | "line" | "type" | "description" | "price" | "cost" | "status"> | null;
+  product: Pick<ProductRow, "name" | "line" | "type" | "description" | "price" | "status"> | null;
   action: (prev: unknown, formData: FormData) => Promise<{ errors: Record<string, string> } | void>;
 };
 
@@ -44,10 +44,6 @@ export default function ProductForm({ product, action }: Props) {
         <label className="block flex-1 text-ink-2">Precio (MXN)
           <input name="price" defaultValue={product ? peso(product.price) : ""} className={inputClass} />
           {e.price && <span className="text-red-600 text-xs">{e.price}</span>}
-        </label>
-        <label className="block flex-1 text-ink-2">Costo (MXN)
-          <input name="cost" defaultValue={product ? peso(product.cost) : ""} className={inputClass} />
-          {e.cost && <span className="text-red-600 text-xs">{e.cost}</span>}
         </label>
       </div>
 

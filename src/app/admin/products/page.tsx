@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { listProducts } from "@/lib/repos/products";
 import { formatMXN } from "@/domain/money";
-import { calcMargin } from "@/domain/margin";
 import { buttonClass, Eyebrow } from "@/components/ui";
 
 export default async function ProductsPage() {
@@ -21,25 +20,20 @@ export default async function ProductsPage() {
             <th className="py-2"><Eyebrow>Nombre</Eyebrow></th>
             <th><Eyebrow>Línea</Eyebrow></th>
             <th><Eyebrow>Precio</Eyebrow></th>
-            <th><Eyebrow>Margen</Eyebrow></th>
             <th><Eyebrow>Estado</Eyebrow></th>
           </tr>
         </thead>
         <tbody>
-          {products.map((p) => {
-            const m = calcMargin(p.price, p.cost);
-            return (
-              <tr key={p.id} className="border-t border-line">
-                <td className="py-2 text-ink"><Link href={`/admin/products/${p.id}`}>{p.name}</Link></td>
-                <td className="text-ink-2">{p.line}</td>
-                <td className="text-ink">{formatMXN(p.price)}</td>
-                <td className="text-ink-2">{formatMXN(m.amount)} · {m.pct}%</td>
-                <td className="text-ink-2">{p.status}</td>
-              </tr>
-            );
-          })}
+          {products.map((p) => (
+            <tr key={p.id} className="border-t border-line">
+              <td className="py-2 text-ink"><Link href={`/admin/products/${p.id}`}>{p.name}</Link></td>
+              <td className="text-ink-2">{p.line}</td>
+              <td className="text-ink">{formatMXN(p.price)}</td>
+              <td className="text-ink-2">{p.status}</td>
+            </tr>
+          ))}
           {products.length === 0 && (
-            <tr><td colSpan={5} className="py-6 text-center text-ink-3">Aún no hay productos.</td></tr>
+            <tr><td colSpan={4} className="py-6 text-center text-ink-3">Aún no hay productos.</td></tr>
           )}
         </tbody>
       </table>

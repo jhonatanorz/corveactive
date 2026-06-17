@@ -7,7 +7,6 @@ const valid = {
   type: "legging",
   description: "Te abraza sin apretar.",
   price: "690",
-  cost: "250",
   status: "active",
 };
 
@@ -22,7 +21,6 @@ describe("validateProductInput", () => {
         type: "legging",
         description: "Te abraza sin apretar.",
         price: 69000,
-        cost: 25000,
         status: "active",
       });
     }
@@ -50,11 +48,5 @@ describe("validateProductInput", () => {
     const r = validateProductInput({ ...valid, price: "abc" });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors.price).toBeDefined();
-  });
-
-  it("defaults cost to 0 when blank", () => {
-    const r = validateProductInput({ ...valid, cost: "" });
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.value.cost).toBe(0);
   });
 });

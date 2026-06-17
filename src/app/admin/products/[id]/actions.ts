@@ -12,7 +12,7 @@ export async function saveProduct(
   formData: FormData,
 ): Promise<{ errors: Record<string, string> } | void> {
   const raw = Object.fromEntries(
-    ["name", "line", "type", "description", "price", "cost", "status"].map((k) => [
+    ["name", "line", "type", "description", "price", "status"].map((k) => [
       k, String(formData.get(k) ?? ""),
     ]),
   );
