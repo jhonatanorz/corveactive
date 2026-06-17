@@ -22,7 +22,7 @@ export default async function CatalogPage() {
             <Blob fill="lime" className="absolute -bottom-20 -left-10 w-64 h-64 opacity-90 mix-blend-screen" />
             <div className="relative">
               <Eyebrow className="text-periwinkle-2 mb-2">CORVE {s.line}</Eyebrow>
-              <h2 className="font-display text-5xl leading-none">{s.title}</h2>
+              <h2 className="font-display text-5xl leading-none text-lime">{s.title}</h2>
               <p className="italic opacity-80 mt-2">{s.message}</p>
             </div>
           </div>
