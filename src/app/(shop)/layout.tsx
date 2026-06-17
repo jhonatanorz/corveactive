@@ -1,6 +1,7 @@
 import { CartProvider } from "@/lib/cart/CartContext";
 import { Wordmark } from "@/components/ui";
 import CartPill from "./CartPill";
+import Footer from "./Footer";
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
           <CartPill />
         </header>
         {children}
+        <Footer />
       </div>
     </CartProvider>
   );
