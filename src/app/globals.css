@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Display serif — self-hosted to avoid the next/font/local + Turbopack panic on Windows.
+   DM Sans / DM Mono are loaded via a <link> in the root layout. */
+@font-face {
+  font-family: "Dream Avenue";
+  src: url("/fonts/DreamAvenue-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Brand palette */
   --periwinkle: #a0b5e7;
@@ -44,9 +54,9 @@
   --shadow-2: 0 2px 4px rgba(26, 27, 58, 0.06), 0 12px 28px rgba(26, 27, 58, 0.08);
   --shadow-bold: 0 8px 28px rgba(72, 73, 235, 0.22);
 
-  --font-display: var(--font-dream-avenue), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--font-dm-mono), ui-monospace, Menlo, Consolas, monospace;
+  --font-display: "Dream Avenue", "Cormorant Garamond", Georgia, serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 
 @utility blob {
