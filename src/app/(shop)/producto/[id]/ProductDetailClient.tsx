@@ -51,7 +51,7 @@ export default function ProductDetailClient({ productId, productName, price, lin
     <main className="md:flex md:gap-6 md:max-w-4xl md:mx-auto md:p-6">
       {/* gallery */}
       <div className="md:w-1/2 md:flex md:gap-3">
-        <div className="order-1 md:order-2 relative h-96 md:h-[28rem] md:flex-1 bg-mist overflow-hidden">
+        <div className="order-1 md:order-2 relative aspect-[3/4] md:flex-1 md:self-start bg-mist overflow-hidden rounded-lg">
           <FadeImage src={activeUrl} alt={productName} sizes="(min-width:768px) 40vw, 100vw" />
         </div>
         {images.length > 1 && (
