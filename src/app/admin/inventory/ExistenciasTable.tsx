@@ -41,9 +41,9 @@ export function ExistenciasTable({ rows }: { rows: ExistenciaRow[] }) {
       <Table>
         <THead>
           <Th>Variante</Th>
-          <Th>Costo</Th>
-          <Th>Stock</Th>
-          <Th>Corregir existencia</Th>
+          <Th className="text-right">Costo</Th>
+          <Th className="text-right">Stock</Th>
+          <Th className="border-l border-line text-right">Ajustar existencia</Th>
         </THead>
         <tbody>
           {filtered.map((r) => (
@@ -57,19 +57,19 @@ export function ExistenciasTable({ rows }: { rows: ExistenciaRow[] }) {
                   </span>
                 </div>
               </Td>
-              <Td className="text-ink-2">{r.cost === null ? "—" : formatMXN(r.cost)}</Td>
-              <Td className={r.stock <= 1 ? "font-semibold text-red-600" : "text-ink"}>{r.stock}</Td>
-              <Td>
-                <form action={correctVariant} className="flex flex-wrap items-center gap-1">
+              <Td className="text-right text-ink-2">{r.cost === null ? "—" : formatMXN(r.cost)}</Td>
+              <Td className={`text-right ${r.stock <= 1 ? "font-semibold text-red-600" : "text-ink"}`}>{r.stock}</Td>
+              <Td className="border-l border-line">
+                <form action={correctVariant} className="flex flex-nowrap items-center justify-end gap-2">
                   <input type="hidden" name="variantId" value={r.variantId} />
                   <input type="hidden" name="productId" value={r.productId} />
-                  <input name="target" type="number" min="0" defaultValue={r.stock} aria-label="Nueva existencia" className={`w-16 ${fieldClass}`} />
+                  <input name="target" type="number" min="0" defaultValue={r.stock} aria-label="Nueva existencia" title="Nueva existencia" className={`w-14 ${fieldClass}`} />
                   <select name="reason" defaultValue="ajuste" aria-label="Motivo" className={`w-28 capitalize ${fieldClass}`}>
                     {REASONS.map((rs) => (
                       <option key={rs} value={rs}>{rs}</option>
                     ))}
                   </select>
-                  <input name="cost" type="text" inputMode="decimal" placeholder="costo (si sube)" aria-label="Costo si sube" className={`w-24 ${fieldClass}`} />
+                  <input name="cost" type="text" inputMode="decimal" placeholder="costo" aria-label="Costo si aumenta" title="Costo unitario (solo si aumenta el stock)" className={`w-20 ${fieldClass}`} />
                   <Button type="submit" variant="ghost" size="sm">Corregir</Button>
                 </form>
               </Td>

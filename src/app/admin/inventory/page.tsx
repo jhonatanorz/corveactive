@@ -4,9 +4,10 @@ import { imagesByProducts } from "@/lib/repos/products";
 import { currentCost } from "@/domain/inventory";
 import { pickProductImage } from "@/domain/product-image";
 import { formatMXN } from "@/domain/money";
-import { KpiCard, PageHeader, Table, THead, Th, Td, Tr } from "@/components/ui";
+import { KpiCard, PageHeader } from "@/components/ui";
 import type { VariantRow } from "@/lib/db-types";
 import { ExistenciasTable, type ExistenciaRow } from "./ExistenciasTable";
+import { MovimientosTable, type MovRow } from "./MovimientosTable";
 
 export default async function InventoryPage() {
   const supabase = await createClient();
@@ -32,6 +33,14 @@ export default async function InventoryPage() {
     imageUrl: pickProductImage(imgByProduct[v.product_id] ?? [], v.color),
   }));
 
+  const movRows: MovRow[] = movements.map((m) => ({
+    id: m.id,
+    label: m.type,
+    sub: m.reference ?? m.reason ?? null,
+    delta: m.delta,
+    date: m.created_at,
+  }));
+
   return (
     <div className="p-6 space-y-8 text-sm">
       <PageHeader title="Inventario" />
@@ -51,35 +60,7 @@ export default async function InventoryPage() {
 
       <ExistenciasTable rows={existencias} />
 
-      <section>
-        <h2 className="text-lg font-bold mb-3 text-ink">Movimientos</h2>
-        <Table>
-          <THead>
-            <Th>Movimiento</Th>
-            <Th>Cantidad</Th>
-            <Th>Fecha</Th>
-          </THead>
-          <tbody>
-            {movements.map((m) => (
-              <Tr key={m.id}>
-                <Td>
-                  <span className="text-ink">{m.type}</span>
-                  {(m.reference || m.reason) && (
-                    <span className="text-ink-3"> · {m.reference ?? m.reason}</span>
-                  )}
-                </Td>
-                <Td className={m.delta >= 0 ? "font-medium text-green-700" : "font-medium text-orange-700"}>
-                  {m.delta >= 0 ? "+" : ""}{m.delta}
-                </Td>
-                <Td className="text-ink-2">{m.created_at.slice(0, 10)}</Td>
-              </Tr>
-            ))}
-            {movements.length === 0 && (
-              <Tr><Td colSpan={3} className="py-8 text-center text-ink-3">Sin movimientos aún.</Td></Tr>
-            )}
-          </tbody>
-        </Table>
-      </section>
+      <MovimientosTable movements={movRows} />
     </div>
   );
 }
