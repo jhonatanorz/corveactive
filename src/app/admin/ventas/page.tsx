@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { getSalesSummary } from "@/lib/repos/sales";
+import { listLines } from "@/lib/repos/lines";
 import { formatMXN } from "@/domain/money";
-import type { Line } from "@/domain/types";
 import { Button, KpiCard, PageHeader, buttonClass } from "@/components/ui";
 
 const dateInput = "block rounded-sm border border-line bg-white p-2 text-sm text-ink";
 
 export default async function VentasPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string; line?: string }> }) {
   const sp = await searchParams;
-  const filter = { from: sp.from, to: sp.to, line: (sp.line as Line | undefined) || undefined };
-  const summary = await getSalesSummary(filter);
+  const filter = { from: sp.from, to: sp.to, line: sp.line || undefined };
+  const [summary, lines] = await Promise.all([getSalesSummary(filter), listLines()]);
 
   const link = (q: Record<string, string>) => "/admin/ventas?" + new URLSearchParams(q).toString();
 
@@ -21,8 +21,12 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           <Link href="/admin/ventas" className={`${buttonClass("primary", "sm")} ${!sp.line ? "" : "opacity-50"} rounded-pill`}>Todo</Link>
-          <Link href={link({ line: "MOVE" })} className={`${buttonClass("primary", "sm")} ${sp.line === "MOVE" ? "" : "opacity-50"} rounded-pill`}>MOVE</Link>
-          <Link href={link({ line: "HIM" })} className={`${buttonClass("primary", "sm")} ${sp.line === "HIM" ? "" : "opacity-50"} rounded-pill`}>HIM</Link>
+          {lines.map((l) => (
+            <Link key={l.slug} href={link({ line: l.slug })}
+              className={`${buttonClass("primary", "sm")} ${sp.line === l.slug ? "" : "opacity-50"} rounded-pill`}>
+              {l.slug}
+            </Link>
+          ))}
         </div>
         <form className="flex flex-wrap items-end gap-2">
           <label className="text-xs text-ink-2">Desde<input name="from" type="date" defaultValue={sp.from} className={dateInput} /></label>
