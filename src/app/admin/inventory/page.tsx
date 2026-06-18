@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { listMovements, totalInventoryValue, allVariantLots } from "@/lib/repos/inventory";
+import { imagesByProducts } from "@/lib/repos/products";
 import { currentCost } from "@/domain/inventory";
+import { pickProductImage } from "@/domain/product-image";
 import { formatMXN } from "@/domain/money";
-import { Button, Card, KpiCard, PageHeader, Table, THead, Th, Td, Tr } from "@/components/ui";
+import { Button, Card, KpiCard, PageHeader, Table, THead, Th, Td, Tr, Thumb } from "@/components/ui";
 import type { VariantRow } from "@/lib/db-types";
 import { correctVariant } from "./actions";
 
@@ -14,12 +16,13 @@ export default async function InventoryPage() {
   const { data: variants, error } = await supabase
     .from("variants").select("*, products(name)").order("stock", { ascending: true });
   if (error) throw error;
-  const [movements, invValue, lotsByVariant] = await Promise.all([
+  const rows = (variants ?? []) as (VariantRow & { products: { name: string } | null })[];
+  const [movements, invValue, lotsByVariant, imgByProduct] = await Promise.all([
     listMovements(50),
     totalInventoryValue(),
     allVariantLots(),
+    imagesByProducts(rows.map((r) => r.product_id)),
   ]);
-  const rows = (variants ?? []) as (VariantRow & { products: { name: string } | null })[];
 
   return (
     <div className="p-6 space-y-6 text-sm">
@@ -53,8 +56,13 @@ export default async function InventoryPage() {
                 return (
                   <Tr key={v.id}>
                     <Td>
-                      <span className="text-ink">{v.products?.name ?? "—"}</span>
-                      <span className="text-ink-3"> · {v.color} · {v.size}</span>
+                      <div className="flex items-center gap-2">
+                        <Thumb src={pickProductImage(imgByProduct[v.product_id] ?? [], v.color)} className="h-9 w-7" />
+                        <span>
+                          <span className="text-ink">{v.products?.name ?? "—"}</span>
+                          <span className="text-ink-3"> · {v.color} · {v.size}</span>
+                        </span>
+                      </div>
                     </Td>
                     <Td className="text-ink-2">{cc === null ? "—" : formatMXN(cc)}</Td>
                     <Td className={v.stock <= 1 ? "font-semibold text-red-600" : "text-ink"}>{v.stock}</Td>

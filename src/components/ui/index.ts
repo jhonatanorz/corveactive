@@ -9,6 +9,7 @@ export type { PillTone } from "./Pill";
 export { PageHeader } from "./PageHeader";
 export { Toaster } from "./Toaster";
 export { KpiCard } from "./KpiCard";
+export { Thumb } from "./Thumb";
 export { ImageUploader } from "./ImageUploader";
 export { Blob } from "./Blob";
 export { Wordmark } from "./Wordmark";

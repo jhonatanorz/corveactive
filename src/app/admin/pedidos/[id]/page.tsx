@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/repos/orders";
+import { imagesByProducts } from "@/lib/repos/products";
 import { formatMXN } from "@/domain/money";
+import { pickProductImage } from "@/domain/product-image";
 import { buildWhatsAppLink } from "@/domain/whatsapp";
 import { changeStatus, cancel } from "./actions";
-import { Button } from "@/components/ui";
+import { Button, Thumb } from "@/components/ui";
 
 const FLOW = ["nuevo", "confirmado", "pagado", "enviado", "entregado"];
 
@@ -12,6 +14,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const data = await getOrder(id);
   if (!data) notFound();
   const { order, items } = data;
+  const imgByProduct = await imagesByProducts(items.map((i) => i.product_id).filter((x): x is string => !!x));
   const wa = buildWhatsAppLink(order.customer_whatsapp, `Hola ${order.customer_name}, sobre tu pedido CORVE #${id.slice(0, 8)}…`);
 
   return (
@@ -21,8 +24,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {order.delivery_note && <p className="opacity-70 text-ink-2">{order.delivery_note}</p>}
       <ul className="my-3">
         {items.map((i) => (
-          <li key={i.id} className="flex justify-between border-b border-line py-1 text-ink">
-            <span>{i.product_name} · {i.color}/{i.size} ×{i.qty}</span>
+          <li key={i.id} className="flex items-center gap-3 border-b border-line py-2 text-ink">
+            <Thumb src={i.product_id ? pickProductImage(imgByProduct[i.product_id] ?? [], i.color) : null} className="h-12 w-10" />
+            <span className="flex-1">{i.product_name} · {i.color}/{i.size} ×{i.qty}</span>
             <span>{formatMXN(i.unit_price * i.qty)}</span>
           </li>
         ))}

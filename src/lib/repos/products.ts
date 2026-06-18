@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ProductRow, VariantRow } from "@/lib/db-types";
 import type { ProductImageRow } from "@/lib/db-types";
 import type { ProductPayload } from "@/lib/admin/product-input";
+import type { ImageChoice } from "@/domain/product-image";
 
 export interface ProductWithVariants {
   product: ProductRow;
@@ -67,6 +68,21 @@ export async function updateVariant(
   const supabase = await createClient();
   const { error } = await supabase.from("variants").update(fields).eq("id", variantId);
   if (error) throw error;
+}
+
+/** Images grouped by product id, for a set of products (for thumbnails). */
+export async function imagesByProducts(productIds: string[]): Promise<Record<string, ImageChoice[]>> {
+  const ids = [...new Set(productIds.filter(Boolean))];
+  if (ids.length === 0) return {};
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("product_images").select("product_id,url,color").in("product_id", ids);
+  if (error) throw error;
+  const out: Record<string, ImageChoice[]> = {};
+  for (const r of (data ?? []) as { product_id: string; url: string; color: string | null }[]) {
+    (out[r.product_id] ??= []).push({ url: r.url, color: r.color });
+  }
+  return out;
 }
 
 export async function listImages(productId: string): Promise<ProductImageRow[]> {
