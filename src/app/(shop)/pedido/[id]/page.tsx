@@ -25,6 +25,7 @@ export default function OrderConfirmationPage({ params }: { params: Promise<{ id
       const raw = sessionStorage.getItem("corve-last-order");
       if (raw) {
         const o = JSON.parse(raw) as LastOrder;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- load last order from sessionStorage after mount
         if (o.id === id) setOrder(o);
       }
     } catch {

@@ -1,8 +1,8 @@
 import type { Centavos } from "@/domain/money";
-import { type Line, type OrderStatus, SALE_STATUSES } from "@/domain/types";
+import { type OrderStatus, SALE_STATUSES } from "@/domain/types";
 
 export interface SaleItem {
-  line: Line;
+  line: string;
   unitPrice: Centavos;
   cost: Centavos;
   qty: number;
@@ -15,7 +15,7 @@ export interface SaleOrder {
 }
 
 export interface SalesFilter {
-  line?: Line;
+  line?: string;
   from?: string; // inclusive YYYY-MM-DD
   to?: string; // inclusive YYYY-MM-DD
 }

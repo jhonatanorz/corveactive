@@ -3,26 +3,36 @@ import { createClient } from "@/lib/supabase/server";
 import type { ProductRow, VariantRow } from "@/lib/db-types";
 import type { ProductImageRow } from "@/lib/db-types";
 import type { ProductPayload } from "@/lib/admin/product-input";
+import type { ImageChoice } from "@/domain/product-image";
 
 export interface ProductWithVariants {
   product: ProductRow;
   variants: VariantRow[];
 }
 
-export async function listProducts(): Promise<ProductRow[]> {
+export interface ProductListRow extends ProductRow {
+  lineSlug: string;
+}
+
+export async function listProducts(): Promise<ProductListRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select("*, product_lines(slug)")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data as ProductRow[];
+  type Raw = ProductRow & { product_lines: { slug: string } | { slug: string }[] | null };
+  return (data as Raw[]).map((r) => {
+    const l = Array.isArray(r.product_lines) ? r.product_lines[0] : r.product_lines;
+    return { ...r, lineSlug: l?.slug ?? "" };
+  });
 }
 
 export async function getProduct(id: string): Promise<ProductWithVariants | null> {
   const supabase = await createClient();
   const { data: product, error } = await supabase
-    .from("products").select("*").eq("id", id).maybeSingle();
+    .from("products").select("*").eq("id", id).is("deleted_at", null).maybeSingle();
   if (error) throw error;
   if (!product) return null;
   const { data: variants, error: vErr } = await supabase
@@ -57,6 +67,40 @@ export async function saveVariants(
     .from("variants")
     .upsert(rows, { onConflict: "product_id,color,size" });
   if (error) throw error;
+}
+
+/** Soft-delete a product: mark deleted_at so it drops out of the catalog/admin
+ *  lists while keeping the row (and its variants/orders/history) intact. */
+export async function softDeleteProduct(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("products").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw error;
+}
+
+/** Update a single variant's color / hex / size by id. */
+export async function updateVariant(
+  variantId: string,
+  fields: { color: string; color_hex: string; size: string },
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("variants").update(fields).eq("id", variantId);
+  if (error) throw error;
+}
+
+/** Images grouped by product id, for a set of products (for thumbnails). */
+export async function imagesByProducts(productIds: string[]): Promise<Record<string, ImageChoice[]>> {
+  const ids = [...new Set(productIds.filter(Boolean))];
+  if (ids.length === 0) return {};
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("product_images").select("product_id,url,color").in("product_id", ids);
+  if (error) throw error;
+  const out: Record<string, ImageChoice[]> = {};
+  for (const r of (data ?? []) as { product_id: string; url: string; color: string | null }[]) {
+    (out[r.product_id] ??= []).push({ url: r.url, color: r.color });
+  }
+  return out;
 }
 
 export async function listImages(productId: string): Promise<ProductImageRow[]> {

@@ -37,7 +37,7 @@ export interface OrderRow {
 }
 export interface OrderItemRow {
   id: string; product_name: string; line: string; color: string; size: string;
-  unit_price: number; cost: number; qty: number;
+  unit_price: number; cost: number; qty: number; product_id: string | null;
 }
 
 export async function getOrder(id: string): Promise<{ order: OrderRow; items: OrderItemRow[] } | null> {
@@ -46,9 +46,22 @@ export async function getOrder(id: string): Promise<{ order: OrderRow; items: Or
   if (error) throw error;
   if (!order) return null;
   const { data: items, error: iErr } = await supabase
-    .from("order_items").select("id,product_name,line,color,size,unit_price,cost,qty").eq("order_id", id);
+    .from("order_items")
+    .select("id,product_name,line,color,size,unit_price,cost,qty,variants(product_id)")
+    .eq("order_id", id);
   if (iErr) throw iErr;
-  return { order: order as OrderRow, items: (items ?? []) as OrderItemRow[] };
+  type RawItem = Omit<OrderItemRow, "product_id"> & {
+    variants: { product_id: string } | { product_id: string }[] | null;
+  };
+  const mapped: OrderItemRow[] = ((items ?? []) as RawItem[]).map((it) => {
+    const v = it.variants;
+    const product_id = Array.isArray(v) ? (v[0]?.product_id ?? null) : (v?.product_id ?? null);
+    return {
+      id: it.id, product_name: it.product_name, line: it.line, color: it.color, size: it.size,
+      unit_price: it.unit_price, cost: it.cost, qty: it.qty, product_id,
+    };
+  });
+  return { order: order as OrderRow, items: mapped };
 }
 
 export async function listOrders(): Promise<OrderRow[]> {

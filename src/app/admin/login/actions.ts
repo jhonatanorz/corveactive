@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { setFlash } from "@/lib/flash";
 
 export async function signIn(_prev: unknown, formData: FormData): Promise<{ error: string } | void> {
   const email = String(formData.get("email") ?? "");
@@ -9,6 +10,7 @@ export async function signIn(_prev: unknown, formData: FormData): Promise<{ erro
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "Correo o contraseña incorrectos" };
+  await setFlash("Sesión iniciada");
   redirect("/admin/products");
 }
 

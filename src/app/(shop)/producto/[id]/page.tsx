@@ -15,7 +15,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       productId={product.id}
       productName={product.name}
       price={product.price}
-      line={product.line}
+      line={product.product_lines.slug}
       description={product.description}
       variants={variants.map((v) => ({ id: v.id, color: v.color, size: v.size, stock: v.stock }))}
       images={images}

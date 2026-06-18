@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart/CartContext";
 import { availableByColor, type AvailVariant } from "@/domain/availability";
@@ -30,9 +30,17 @@ export default function ProductDetailClient({ productId, productName, price, lin
   const [color, setColor] = useState(colors[0]?.color ?? "");
   const [size, setSize] = useState("");
   const [activeUrl, setActiveUrl] = useState<string | null>(() => pickProductImage(images, colors[0]?.color ?? null));
+  const [added, setAdded] = useState(false);
 
   const sizes = byColor.find((c) => c.color === color)?.sizes ?? [];
   const chosen = variants.find((v) => v.color === color && v.size === size);
+
+  useEffect(() => {
+    if (!added) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setAdded(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [added]);
 
   function selectColor(c: string) {
     setColor(c);
@@ -108,11 +116,53 @@ export default function ProductDetailClient({ productId, productName, price, lin
           onClick={() => {
             if (!chosen) return;
             add({ variantId: chosen.id, productId, productName, color, size, unitPrice: price, qty: 1, image: pickProductImage(images, color) });
-            router.push("/carrito");
+            setAdded(true);
           }}>
           Agregar · {formatMXN(price)}
         </Button>
       </FloatingBar>
+
+      {added && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Producto agregado al carrito"
+          onClick={() => setAdded(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-pill bg-lime">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-ink">Agregado al carrito</h2>
+
+            <div className="mt-3 flex items-center justify-center gap-3">
+              {pickProductImage(images, color) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={pickProductImage(images, color)!} alt="" className="h-14 w-12 rounded-md object-cover" />
+              )}
+              <div className="text-left text-sm">
+                <div className="font-medium text-ink">{productName}</div>
+                <div className="text-ink-3">{color} · {size}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              <Button variant="primary" className="w-full" onClick={() => router.push("/carrito")}>
+                Ir al carrito
+              </Button>
+              <Button variant="soft" className="w-full" onClick={() => router.push("/")}>
+                Explorar más productos
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

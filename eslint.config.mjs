@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Untracked design-system asset bundle (not part of the app).
+    "design_system/**",
   ]),
 ]);
 
