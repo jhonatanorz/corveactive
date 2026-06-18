@@ -24,10 +24,13 @@ export default function CatalogSideMenu({ lines, categories, open, onClose }: Pr
 
   function toggleCategory(slug: string) {
     const next = activeCats.includes(slug) ? activeCats.filter((s) => s !== slug) : [...activeCats, slug];
-    const qs = next.length ? `?cat=${next.join(",")}` : "";
     const onBrowse = pathname === "/" || pathname.startsWith("/linea/");
-    if (onBrowse) router.replace(`${pathname}${qs}`, { scroll: false });
-    else router.push(`/${qs}`);
+    const params = new URLSearchParams(onBrowse ? sp.toString() : "");
+    if (next.length) params.set("cat", next.join(","));
+    else params.delete("cat");
+    const qs = params.toString();
+    if (onBrowse) router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    else router.push(`/${qs ? `?${qs}` : ""}`);
     onClose();
   }
 
