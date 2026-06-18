@@ -18,6 +18,7 @@ export async function listActiveByLine(line: Line): Promise<CatalogListProduct[]
     .from("products")
     .select("*, product_images(*), variants(color,color_hex)")
     .eq("status", "active")
+    .is("deleted_at", null)
     .eq("line", line)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -33,7 +34,7 @@ export interface ProductDetail {
 export async function getActiveProduct(id: string): Promise<ProductDetail | null> {
   const supabase = await createClient();
   const { data: product, error } = await supabase
-    .from("products").select("*, product_images(*)").eq("id", id).eq("status", "active").maybeSingle();
+    .from("products").select("*, product_images(*)").eq("id", id).eq("status", "active").is("deleted_at", null).maybeSingle();
   if (error) throw error;
   if (!product) return null;
   const { data: variants, error: vErr } = await supabase

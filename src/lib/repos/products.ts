@@ -15,6 +15,7 @@ export async function listProducts(): Promise<ProductRow[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as ProductRow[];
@@ -23,7 +24,7 @@ export async function listProducts(): Promise<ProductRow[]> {
 export async function getProduct(id: string): Promise<ProductWithVariants | null> {
   const supabase = await createClient();
   const { data: product, error } = await supabase
-    .from("products").select("*").eq("id", id).maybeSingle();
+    .from("products").select("*").eq("id", id).is("deleted_at", null).maybeSingle();
   if (error) throw error;
   if (!product) return null;
   const { data: variants, error: vErr } = await supabase
@@ -57,6 +58,15 @@ export async function saveVariants(
   const { error } = await supabase
     .from("variants")
     .upsert(rows, { onConflict: "product_id,color,size" });
+  if (error) throw error;
+}
+
+/** Soft-delete a product: mark deleted_at so it drops out of the catalog/admin
+ *  lists while keeping the row (and its variants/orders/history) intact. */
+export async function softDeleteProduct(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("products").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;
 }
 

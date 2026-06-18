@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
-import { createProduct, updateProduct, saveVariants, updateVariant, addProductImage, deleteProductImage } from "@/lib/repos/products";
+import { createProduct, updateProduct, saveVariants, updateVariant, softDeleteProduct, addProductImage, deleteProductImage } from "@/lib/repos/products";
 import { setFlash, withFlash } from "@/lib/flash";
 
 export async function saveProduct(
@@ -28,6 +28,14 @@ export async function saveProduct(
     revalidatePath(`/admin/products/${id}`);
     revalidatePath("/admin/products");
   }
+}
+
+export async function deleteProduct(productId: string): Promise<void> {
+  await softDeleteProduct(productId);
+  await setFlash("Producto eliminado");
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  redirect("/admin/products");
 }
 
 export async function addVariant(productId: string, formData: FormData): Promise<void> {

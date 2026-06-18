@@ -10,6 +10,7 @@ export interface ProductRow {
   status: ProductStatus;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface VariantRow {

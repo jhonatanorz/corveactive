@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, listImages } from "@/lib/repos/products";
-import { saveProduct, addVariant, editVariant, uploadImage, deleteImage } from "./actions";
+import { saveProduct, addVariant, editVariant, uploadImage, deleteImage, deleteProduct } from "./actions";
 import ProductForm from "./ProductForm";
+import { DeleteProductButton } from "./DeleteProductButton";
 import { Button, Card, Eyebrow, ImageUploader } from "@/components/ui";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -34,6 +35,11 @@ export default async function ProductEditorPage({
       <div className="grid max-w-5xl gap-8 lg:grid-cols-2">
         <div>
           <ProductForm product={existing?.product ?? null} action={saveProduct.bind(null, id)} />
+          {id !== "new" && (
+            <div className="mt-6 border-t border-line pt-4">
+              <DeleteProductButton action={deleteProduct.bind(null, id)} />
+            </div>
+          )}
         </div>
 
         {id !== "new" && (

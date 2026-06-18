@@ -12,9 +12,10 @@ import { MovimientosTable, type MovRow } from "./MovimientosTable";
 export default async function InventoryPage() {
   const supabase = await createClient();
   const { data: variants, error } = await supabase
-    .from("variants").select("*, products(name)").order("stock", { ascending: true });
+    .from("variants").select("*, products(name, deleted_at)").order("stock", { ascending: true });
   if (error) throw error;
-  const rows = (variants ?? []) as (VariantRow & { products: { name: string } | null })[];
+  const rows = ((variants ?? []) as (VariantRow & { products: { name: string; deleted_at: string | null } | null })[])
+    .filter((r) => !r.products?.deleted_at);
   const [movements, invValue, lotsByVariant, imgByProduct] = await Promise.all([
     listMovements(50),
     totalInventoryValue(),
