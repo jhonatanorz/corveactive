@@ -1,4 +1,3 @@
-// src/app/(shop)/pedido/[id]/page.tsx
 import { getStoreSettings } from "@/lib/repos/settings";
 import OrderConfirmation from "./OrderConfirmation";
 

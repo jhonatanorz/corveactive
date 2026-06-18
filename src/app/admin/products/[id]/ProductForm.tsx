@@ -1,21 +1,23 @@
 "use client";
 
 import { useActionState } from "react";
-import type { ProductRow } from "@/lib/db-types";
+import type { ProductRow, ProductLineRow, ProductCategoryRow } from "@/lib/db-types";
 import { Button, inputClass } from "@/components/ui";
 
 type Props = {
-  product: Pick<ProductRow, "name" | "line" | "type" | "description" | "price" | "cost" | "status"> | null;
+  product: Pick<ProductRow, "name" | "line_id" | "category_id" | "description" | "price" | "status"> | null;
+  lines: Pick<ProductLineRow, "id" | "name">[];
+  categories: Pick<ProductCategoryRow, "id" | "name">[];
   action: (prev: unknown, formData: FormData) => Promise<{ errors: Record<string, string> } | void>;
 };
 
 const peso = (centavos: number) => (centavos / 100).toString();
 
-export default function ProductForm({ product, action }: Props) {
+export default function ProductForm({ product, lines, categories, action }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const e = state?.errors ?? {};
   return (
-    <form action={formAction} className="max-w-md space-y-3 p-6 text-sm">
+    <form action={formAction} className="space-y-4 text-sm">
       <h1 className="text-lg font-bold text-ink">{product ? "Editar producto" : "Nuevo producto"}</h1>
 
       <label className="block text-ink-2">Nombre
@@ -24,16 +26,19 @@ export default function ProductForm({ product, action }: Props) {
       </label>
 
       <label className="block text-ink-2">Línea
-        <select name="line" defaultValue={product?.line ?? "MOVE"} className={inputClass}>
-          <option value="MOVE">CORVE MOVE</option>
-          <option value="HIM">CORVE HIM</option>
+        <select name="line_id" defaultValue={product?.line_id ?? ""} className={inputClass}>
+          <option value="" disabled>Selecciona una línea</option>
+          {lines.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
-        {e.line && <span className="text-red-600 text-xs">{e.line}</span>}
+        {e.line_id && <span className="text-red-600 text-xs">{e.line_id}</span>}
       </label>
 
-      <label className="block text-ink-2">Tipo
-        <input name="type" defaultValue={product?.type ?? ""} className={inputClass} />
-        {e.type && <span className="text-red-600 text-xs">{e.type}</span>}
+      <label className="block text-ink-2">Categoría
+        <select name="category_id" defaultValue={product?.category_id ?? ""} className={inputClass}>
+          <option value="" disabled>Selecciona una categoría</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        {e.category_id && <span className="text-red-600 text-xs">{e.category_id}</span>}
       </label>
 
       <label className="block text-ink-2">Descripción
@@ -44,10 +49,6 @@ export default function ProductForm({ product, action }: Props) {
         <label className="block flex-1 text-ink-2">Precio (MXN)
           <input name="price" defaultValue={product ? peso(product.price) : ""} className={inputClass} />
           {e.price && <span className="text-red-600 text-xs">{e.price}</span>}
-        </label>
-        <label className="block flex-1 text-ink-2">Costo (MXN)
-          <input name="cost" defaultValue={product ? peso(product.cost) : ""} className={inputClass} />
-          {e.cost && <span className="text-red-600 text-xs">{e.cost}</span>}
         </label>
       </div>
 

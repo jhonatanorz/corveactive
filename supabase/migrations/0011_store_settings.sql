@@ -1,4 +1,4 @@
--- supabase/migrations/0007_store_settings.sql
+-- supabase/migrations/0011_store_settings.sql
 -- Editable store contact settings (key-value). Public reads, admin writes.
 
 create table store_settings (

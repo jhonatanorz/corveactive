@@ -45,3 +45,6 @@ next-env.d.ts
 
 # machine-specific npm config
 .npmrc
+
+# untracked design-system asset bundle (not part of the app)
+design_system/

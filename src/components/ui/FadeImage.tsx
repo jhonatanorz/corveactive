@@ -11,6 +11,7 @@ export function FadeImage({ src, alt, sizes = "100vw", className = "" }: Props) 
   const [on, setOn] = useState(false);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- crossfade: sync incoming/current image to the src prop */
     if (src === current || src === incoming) return;
     if (src === null) {
       setCurrent(null);
@@ -19,6 +20,7 @@ export function FadeImage({ src, alt, sizes = "100vw", className = "" }: Props) 
     }
     setIncoming(src);
     setOn(false);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [src, current, incoming]);
 
   useEffect(() => {
