@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, listImages } from "@/lib/repos/products";
+import { listActiveLines } from "@/lib/repos/lines";
+import { listCategories } from "@/lib/repos/categories";
 import { saveProduct, addVariant, editVariant, uploadImage, deleteImage, deleteProduct } from "./actions";
 import ProductForm from "./ProductForm";
 import { DeleteProductButton } from "./DeleteProductButton";
@@ -24,6 +26,7 @@ export default async function ProductEditorPage({
   const existing = id === "new" ? null : await getProduct(id);
   if (id !== "new" && !existing) notFound();
   const images = id === "new" ? [] : await listImages(id);
+  const [lines, categories] = await Promise.all([listActiveLines(), listCategories()]);
   const variants = existing?.variants ?? [];
   const colors = [...new Set(variants.map((v) => v.color))];
   const sortedVariants = [...variants].sort(
@@ -34,7 +37,12 @@ export default async function ProductEditorPage({
     <div className="p-6">
       <div className="grid max-w-5xl gap-8 lg:grid-cols-2">
         <div>
-          <ProductForm product={existing?.product ?? null} action={saveProduct.bind(null, id)} />
+          <ProductForm
+            product={existing?.product ?? null}
+            lines={lines}
+            categories={categories}
+            action={saveProduct.bind(null, id)}
+          />
           {id !== "new" && (
             <div className="mt-6 border-t border-line pt-4">
               <DeleteProductButton action={deleteProduct.bind(null, id)} />

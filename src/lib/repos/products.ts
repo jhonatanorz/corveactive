@@ -10,15 +10,23 @@ export interface ProductWithVariants {
   variants: VariantRow[];
 }
 
-export async function listProducts(): Promise<ProductRow[]> {
+export interface ProductListRow extends ProductRow {
+  lineSlug: string;
+}
+
+export async function listProducts(): Promise<ProductListRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select("*, product_lines(slug)")
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data as ProductRow[];
+  type Raw = ProductRow & { product_lines: { slug: string } | { slug: string }[] | null };
+  return (data as Raw[]).map((r) => {
+    const l = Array.isArray(r.product_lines) ? r.product_lines[0] : r.product_lines;
+    return { ...r, lineSlug: l?.slug ?? "" };
+  });
 }
 
 export async function getProduct(id: string): Promise<ProductWithVariants | null> {

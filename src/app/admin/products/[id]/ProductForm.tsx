@@ -1,17 +1,19 @@
 "use client";
 
 import { useActionState } from "react";
-import type { ProductRow } from "@/lib/db-types";
+import type { ProductRow, ProductLineRow, ProductCategoryRow } from "@/lib/db-types";
 import { Button, inputClass } from "@/components/ui";
 
 type Props = {
-  product: Pick<ProductRow, "name" | "line" | "type" | "description" | "price" | "status"> | null;
+  product: Pick<ProductRow, "name" | "line_id" | "category_id" | "description" | "price" | "status"> | null;
+  lines: Pick<ProductLineRow, "id" | "name">[];
+  categories: Pick<ProductCategoryRow, "id" | "name">[];
   action: (prev: unknown, formData: FormData) => Promise<{ errors: Record<string, string> } | void>;
 };
 
 const peso = (centavos: number) => (centavos / 100).toString();
 
-export default function ProductForm({ product, action }: Props) {
+export default function ProductForm({ product, lines, categories, action }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const e = state?.errors ?? {};
   return (
@@ -24,16 +26,19 @@ export default function ProductForm({ product, action }: Props) {
       </label>
 
       <label className="block text-ink-2">Línea
-        <select name="line" defaultValue={product?.line ?? "MOVE"} className={inputClass}>
-          <option value="MOVE">CORVE MOVE</option>
-          <option value="HIM">CORVE HIM</option>
+        <select name="line_id" defaultValue={product?.line_id ?? ""} className={inputClass}>
+          <option value="" disabled>Selecciona una línea</option>
+          {lines.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
-        {e.line && <span className="text-red-600 text-xs">{e.line}</span>}
+        {e.line_id && <span className="text-red-600 text-xs">{e.line_id}</span>}
       </label>
 
-      <label className="block text-ink-2">Tipo
-        <input name="type" defaultValue={product?.type ?? ""} className={inputClass} />
-        {e.type && <span className="text-red-600 text-xs">{e.type}</span>}
+      <label className="block text-ink-2">Categoría
+        <select name="category_id" defaultValue={product?.category_id ?? ""} className={inputClass}>
+          <option value="" disabled>Selecciona una categoría</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        {e.category_id && <span className="text-red-600 text-xs">{e.category_id}</span>}
       </label>
 
       <label className="block text-ink-2">Descripción

@@ -31,7 +31,7 @@ export default async function ProductsPage() {
           {products.map((p) => (
             <LinkRow key={p.id} href={`/admin/products/${p.id}`}>
               <Td className="font-medium">{p.name}</Td>
-              <Td className="text-ink-2">{p.line}</Td>
+              <Td className="text-ink-2">{p.lineSlug}</Td>
               <Td>{formatMXN(p.price)}</Td>
               <Td><Pill tone={STATUS_TONE[p.status]}>{p.status}</Pill></Td>
               <ChevronCell />
