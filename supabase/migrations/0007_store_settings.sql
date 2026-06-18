@@ -22,3 +22,4 @@ create policy public_read on store_settings
   for select to anon using (true);
 
 grant select on store_settings to anon;
+grant select, insert, update, delete on store_settings to authenticated;
