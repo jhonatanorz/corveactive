@@ -15,7 +15,7 @@ export default function ProductForm({ product, action }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const e = state?.errors ?? {};
   return (
-    <form action={formAction} className="max-w-md space-y-3 p-6 text-sm">
+    <form action={formAction} className="space-y-4 text-sm">
       <h1 className="text-lg font-bold text-ink">{product ? "Editar producto" : "Nuevo producto"}</h1>
 
       <label className="block text-ink-2">Nombre

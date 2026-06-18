@@ -59,6 +59,16 @@ export async function saveVariants(
   if (error) throw error;
 }
 
+/** Update a single variant's color / hex / size by id. */
+export async function updateVariant(
+  variantId: string,
+  fields: { color: string; color_hex: string; size: string },
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("variants").update(fields).eq("id", variantId);
+  if (error) throw error;
+}
+
 export async function listImages(productId: string): Promise<ProductImageRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

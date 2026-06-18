@@ -2,9 +2,12 @@
 import { revalidatePath } from "next/cache";
 import { setPOSupplier, addPOLine, receivePO } from "@/lib/repos/purchasing";
 import { parsePesosInput } from "@/domain/money";
+import { withFlash } from "@/lib/flash";
 
 export async function chooseSupplier(poId: string, formData: FormData): Promise<void> {
-  await setPOSupplier(poId, String(formData.get("supplier_id") ?? ""));
+  await withFlash("Proveedor asignado", () =>
+    setPOSupplier(poId, String(formData.get("supplier_id") ?? "")),
+  );
   revalidatePath(`/admin/compras/${poId}`);
 }
 
@@ -13,7 +16,7 @@ export async function addLine(poId: string, formData: FormData): Promise<void> {
   const qty = Number(formData.get("qty") ?? 0);
   const unitCost = parsePesosInput(String(formData.get("unit_cost") ?? ""));
   if (!variantId || !Number.isInteger(qty) || qty <= 0 || unitCost === null) return;
-  await addPOLine(poId, variantId, qty, unitCost);
+  await withFlash("Línea agregada", () => addPOLine(poId, variantId, qty, unitCost));
   revalidatePath(`/admin/compras/${poId}`);
 }
 
@@ -25,7 +28,9 @@ export async function receive(poId: string, formData: FormData): Promise<void> {
       if (Number.isInteger(qty) && qty > 0) receipts.push({ variant_id: k.slice("received_".length), qty });
     }
   }
-  if (receipts.length > 0) await receivePO(poId, receipts);
+  if (receipts.length > 0) {
+    await withFlash("Recepción registrada", () => receivePO(poId, receipts));
+  }
   revalidatePath(`/admin/compras/${poId}`);
   revalidatePath("/admin/inventory");
 }

@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { validateProductInput } from "@/lib/admin/product-input";
-import { createProduct, updateProduct, saveVariants, addProductImage, deleteProductImage } from "@/lib/repos/products";
-import { adjustStockToTarget } from "@/lib/repos/inventory";
+import { createProduct, updateProduct, saveVariants, updateVariant, addProductImage, deleteProductImage } from "@/lib/repos/products";
+import { setFlash, withFlash } from "@/lib/flash";
 
 export async function saveProduct(
   id: string,
@@ -21,9 +21,10 @@ export async function saveProduct(
 
   if (id === "new") {
     const newId = await createProduct(result.value);
+    await setFlash("Producto creado");
     redirect(`/admin/products/${newId}`);
   } else {
-    await updateProduct(id, result.value);
+    await withFlash("Producto guardado", () => updateProduct(id, result.value));
     revalidatePath(`/admin/products/${id}`);
     revalidatePath("/admin/products");
   }
@@ -33,30 +34,31 @@ export async function addVariant(productId: string, formData: FormData): Promise
   const color = String(formData.get("color") ?? "").trim();
   const color_hex = String(formData.get("color_hex") ?? "#000000");
   const size = String(formData.get("size") ?? "").trim();
-  const stock = Number(formData.get("stock") ?? 0);
-  if (!color || !size || !Number.isInteger(stock) || stock < 0) return;
-  await saveVariants(productId, [{ color, color_hex, size, stock }]);
+  if (!color || !size) return;
+  // New variants start empty; stock is set via a correction on /admin/inventory.
+  await withFlash("Variante agregada", () =>
+    saveVariants(productId, [{ color, color_hex, size, stock: 0 }]),
+  );
   revalidatePath(`/admin/products/${productId}`);
 }
 
-export async function correctVariant(productId: string, formData: FormData): Promise<void> {
+export async function editVariant(productId: string, formData: FormData): Promise<void> {
   const variantId = String(formData.get("variantId") ?? "");
-  const target = Number(formData.get("target") ?? NaN);
-  if (!variantId || !Number.isInteger(target) || target < 0) return;
-  const reason = String(formData.get("reason") ?? "").trim() || "Corrección manual";
-  const costRaw = String(formData.get("cost") ?? "").trim();
-  const { parsePesosInput } = await import("@/domain/money");
-  const unitCost = costRaw === "" ? null : parsePesosInput(costRaw);
-  await adjustStockToTarget(variantId, target, reason, unitCost);
+  const color = String(formData.get("color") ?? "").trim();
+  const color_hex = String(formData.get("color_hex") ?? "#000000");
+  const size = String(formData.get("size") ?? "").trim();
+  if (!variantId || !color || !size) return;
+  await withFlash("Variante actualizada", () =>
+    updateVariant(variantId, { color, color_hex, size }),
+  );
   revalidatePath(`/admin/products/${productId}`);
-  revalidatePath("/admin/inventory");
 }
 
 export async function uploadImage(productId: string, formData: FormData): Promise<void> {
   const file = formData.get("image");
   if (!(file instanceof File) || file.size === 0) return;
   const color = String(formData.get("color") ?? "").trim() || null;
-  await addProductImage(productId, file, color);
+  await withFlash("Imagen subida", () => addProductImage(productId, file, color));
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/");
   revalidatePath(`/producto/${productId}`);
@@ -65,7 +67,7 @@ export async function uploadImage(productId: string, formData: FormData): Promis
 export async function deleteImage(productId: string, formData: FormData): Promise<void> {
   const imageId = String(formData.get("imageId") ?? "");
   if (!imageId) return;
-  await deleteProductImage(imageId);
+  await withFlash("Imagen eliminada", () => deleteProductImage(imageId));
   revalidatePath(`/admin/products/${productId}`);
   revalidatePath("/");
   revalidatePath(`/producto/${productId}`);

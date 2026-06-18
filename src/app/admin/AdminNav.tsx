@@ -1,26 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useState, type ReactNode } from "react";
 import { Wordmark } from "@/components/ui";
 import { signOut } from "./login/actions";
 
-const LINKS = [
-  { href: "/admin/pedidos", label: "Pedidos" },
-  { href: "/admin/products", label: "Productos" },
-  { href: "/admin/inventory", label: "Inventario" },
-  { href: "/admin/compras", label: "Compras" },
-  { href: "/admin/ventas", label: "Ventas" },
-  { href: "/admin/proveedores", label: "Proveedores" },
+const I = {
+  bag: (
+    <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></>
+  ),
+  tag: (
+    <><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z" /><line x1="7" y1="7" x2="7.01" y2="7" /></>
+  ),
+  box: (
+    <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>
+  ),
+  truck: (
+    <><path d="M1 3h15v13H1z" /><path d="M16 8h4l3 3v5h-7V8Z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></>
+  ),
+  chart: (
+    <><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>
+  ),
+  users: (
+    <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>
+  ),
+};
+
+const LINKS: { href: string; label: string; icon: ReactNode }[] = [
+  { href: "/admin/pedidos", label: "Pedidos", icon: I.bag },
+  { href: "/admin/products", label: "Productos", icon: I.tag },
+  { href: "/admin/inventory", label: "Inventario", icon: I.box },
+  { href: "/admin/compras", label: "Compras", icon: I.truck },
+  { href: "/admin/ventas", label: "Ventas", icon: I.chart },
+  { href: "/admin/proveedores", label: "Proveedores", icon: I.users },
 ];
+
+function Icon({ children }: { children: ReactNode }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </svg>
+  );
+}
 
 export default function AdminNav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
     <>
       {/* Mobile top bar */}
-      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b border-line bg-snow">
+      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b border-line bg-white">
         <button type="button" aria-label="Abrir menú" onClick={() => setOpen(true)} className="text-ink">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -33,14 +65,14 @@ export default function AdminNav() {
       </header>
 
       {/* Backdrop (mobile, when open) */}
-      {open && <div className="fixed inset-0 z-30 bg-ink/30 md:hidden" onClick={() => setOpen(false)} aria-hidden />}
+      {open && <div className="fixed inset-0 z-30 bg-ink/30 backdrop-blur-sm md:hidden" onClick={() => setOpen(false)} aria-hidden />}
 
       {/* Sidebar (desktop) / drawer (mobile) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-60 bg-mist text-ink-2 p-4 text-sm flex flex-col border-r border-line transition-transform duration-200 ease-out md:sticky md:top-0 md:h-screen md:z-auto md:w-44 md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-white p-4 text-sm transition-transform duration-200 ease-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="flex items-center justify-between md:block">
-          <Wordmark href="/admin/pedidos" className="text-xl pb-4" />
+        <div className="mb-6 flex items-center justify-between md:block">
+          <Wordmark href="/admin/pedidos" className="text-2xl" />
           <button type="button" aria-label="Cerrar menú" onClick={() => setOpen(false)} className="md:hidden text-ink-3">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -48,15 +80,40 @@ export default function AdminNav() {
             </svg>
           </button>
         </div>
-        <nav className="space-y-1 flex-1">
-          {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="block py-2 hover:text-royal">
-              {l.label}
-            </Link>
-          ))}
+
+        <nav className="flex-1 space-y-1">
+          {LINKS.map((l) => {
+            const active = isActive(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-3 rounded-md px-3 py-2 transition-colors ${
+                  active
+                    ? "bg-royal text-ink-on-royal shadow-1"
+                    : "text-ink-2 hover:bg-mist hover:text-ink"
+                }`}
+              >
+                <span className={active ? "text-ink-on-royal" : "text-ink-3"}>
+                  <Icon>{l.icon}</Icon>
+                </span>
+                <span className="font-medium">{l.label}</span>
+              </Link>
+            );
+          })}
         </nav>
-        <form action={signOut}>
-          <button className="text-left py-2 text-ink-3 hover:text-royal">Cerrar sesión</button>
+
+        <form action={signOut} className="border-t border-line pt-3">
+          <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-ink-3 transition-colors hover:bg-mist hover:text-ink">
+            <Icon>
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </Icon>
+            <span className="font-medium">Cerrar sesión</span>
+          </button>
         </form>
       </aside>
     </>

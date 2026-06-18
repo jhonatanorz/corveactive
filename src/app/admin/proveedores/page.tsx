@@ -1,12 +1,12 @@
 import { listSuppliers } from "@/lib/repos/suppliers";
 import { addSupplier } from "./actions";
-import { Button, inputClass } from "@/components/ui";
+import { Button, PageHeader, inputClass } from "@/components/ui";
 
 export default async function ProveedoresPage() {
   const suppliers = await listSuppliers();
   return (
     <div className="p-6 max-w-lg text-sm">
-      <h1 className="text-lg font-bold mb-4 text-ink">Proveedores</h1>
+      <PageHeader title="Proveedores" />
       <ul className="mb-4">
         {suppliers.map((s) => (
           <li key={s.id} className="flex justify-between border-b border-line py-1 text-ink">

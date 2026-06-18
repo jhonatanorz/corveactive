@@ -46,6 +46,19 @@ export async function listVariantLots(productId: string): Promise<Record<string,
   return out;
 }
 
+/** Lots grouped by variant across every product (for current-cost display). */
+export async function allVariantLots(): Promise<Record<string, Lot[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("inventory_lots").select("variant_id,qty_remaining,unit_cost");
+  if (error) throw error;
+  const out: Record<string, Lot[]> = {};
+  for (const l of (data ?? []) as { variant_id: string; qty_remaining: number; unit_cost: number }[]) {
+    (out[l.variant_id] ??= []).push({ qty_remaining: l.qty_remaining, unit_cost: l.unit_cost });
+  }
+  return out;
+}
+
 /** Total value of all on-hand inventory (centavos), summed across every lot. */
 export async function totalInventoryValue(): Promise<number> {
   const supabase = await createClient();
