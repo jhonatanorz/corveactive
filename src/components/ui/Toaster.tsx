@@ -19,6 +19,7 @@ export function Toaster({ flash }: { flash: string | null }) {
     } catch {
       t = { msg: flash, tone: "ok" };
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- showing a toast from a server-set flash cookie
     setToast(t);
     document.cookie = "admin_flash=; path=/; max-age=0";
     const timer = setTimeout(() => setToast(null), t.tone === "error" ? 4500 : 3200);

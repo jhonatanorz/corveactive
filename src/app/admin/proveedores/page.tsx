@@ -1,6 +1,6 @@
 import { listSuppliers } from "@/lib/repos/suppliers";
 import { addSupplier } from "./actions";
-import { Button, PageHeader, inputClass } from "@/components/ui";
+import { Button, PageHeader } from "@/components/ui";
 
 export default async function ProveedoresPage() {
   const suppliers = await listSuppliers();
