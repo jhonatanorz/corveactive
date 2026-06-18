@@ -4,12 +4,9 @@ import { imagesByProducts } from "@/lib/repos/products";
 import { currentCost } from "@/domain/inventory";
 import { pickProductImage } from "@/domain/product-image";
 import { formatMXN } from "@/domain/money";
-import { Button, Card, KpiCard, PageHeader, Table, THead, Th, Td, Tr, Thumb } from "@/components/ui";
+import { KpiCard, PageHeader, Table, THead, Th, Td, Tr } from "@/components/ui";
 import type { VariantRow } from "@/lib/db-types";
-import { correctVariant } from "./actions";
-
-const fieldClass =
-  "rounded-sm border border-line bg-white p-1 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-royal/40";
+import { ExistenciasTable, type ExistenciaRow } from "./ExistenciasTable";
 
 export default async function InventoryPage() {
   const supabase = await createClient();
@@ -24,9 +21,21 @@ export default async function InventoryPage() {
     imagesByProducts(rows.map((r) => r.product_id)),
   ]);
 
+  const existencias: ExistenciaRow[] = rows.map((v) => ({
+    variantId: v.id,
+    productId: v.product_id,
+    name: v.products?.name ?? "—",
+    color: v.color,
+    size: v.size,
+    stock: v.stock,
+    cost: currentCost(lotsByVariant[v.id] ?? []),
+    imageUrl: pickProductImage(imgByProduct[v.product_id] ?? [], v.color),
+  }));
+
   return (
-    <div className="p-6 space-y-6 text-sm">
+    <div className="p-6 space-y-8 text-sm">
       <PageHeader title="Inventario" />
+
       <KpiCard
         label="Valor de inventario"
         value={formatMXN(invValue)}
@@ -40,71 +49,37 @@ export default async function InventoryPage() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <h1 className="text-lg font-bold mb-3 text-ink">Existencias</h1>
-          <Table>
-            <THead>
-              <Th>Variante</Th>
-              <Th>Costo</Th>
-              <Th>Stock</Th>
-              <Th>Corregir existencia</Th>
-            </THead>
-            <tbody>
-              {rows.map((v) => {
-                const cc = currentCost(lotsByVariant[v.id] ?? []);
-                return (
-                  <Tr key={v.id}>
-                    <Td>
-                      <div className="flex items-center gap-2">
-                        <Thumb src={pickProductImage(imgByProduct[v.product_id] ?? [], v.color)} className="h-9 w-7" />
-                        <span>
-                          <span className="text-ink">{v.products?.name ?? "—"}</span>
-                          <span className="text-ink-3"> · {v.color} · {v.size}</span>
-                        </span>
-                      </div>
-                    </Td>
-                    <Td className="text-ink-2">{cc === null ? "—" : formatMXN(cc)}</Td>
-                    <Td className={v.stock <= 1 ? "font-semibold text-red-600" : "text-ink"}>{v.stock}</Td>
-                    <Td>
-                      <form action={correctVariant} className="flex flex-wrap items-center gap-1">
-                        <input type="hidden" name="variantId" value={v.id} />
-                        <input type="hidden" name="productId" value={v.product_id} />
-                        <input name="target" type="number" min="0" defaultValue={v.stock} aria-label="Nueva existencia"
-                          className={`w-16 ${fieldClass}`} />
-                        <input name="reason" placeholder="motivo" aria-label="Motivo" className={`w-24 ${fieldClass}`} />
-                        <input name="cost" type="text" inputMode="decimal" placeholder="costo (si sube)" aria-label="Costo si sube"
-                          className={`w-24 ${fieldClass}`} />
-                        <Button type="submit" variant="ghost" size="sm">Corregir</Button>
-                      </form>
-                    </Td>
-                  </Tr>
-                );
-              })}
-              {rows.length === 0 && (
-                <Tr><Td colSpan={4} className="py-8 text-center text-ink-3">Sin variantes.</Td></Tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
+      <ExistenciasTable rows={existencias} />
 
-        <div>
-          <h2 className="text-lg font-bold mb-3 text-ink">Movimientos</h2>
-          <Card className="p-3">
-            <ul className="space-y-1">
-              {movements.map((m) => (
-                <li key={m.id} className="flex justify-between border-b border-line/70 py-1 last:border-0 text-ink">
-                  <span>{m.type}{m.reference ? ` · ${m.reference}` : ""}{m.reason ? ` · ${m.reason}` : ""}</span>
-                  <span className={m.delta >= 0 ? "text-green-700" : "text-orange-700"}>
-                    {m.delta >= 0 ? "+" : ""}{m.delta}
-                  </span>
-                </li>
-              ))}
-              {movements.length === 0 && <li className="text-ink-3">Sin movimientos aún.</li>}
-            </ul>
-          </Card>
-        </div>
-      </div>
+      <section>
+        <h2 className="text-lg font-bold mb-3 text-ink">Movimientos</h2>
+        <Table>
+          <THead>
+            <Th>Movimiento</Th>
+            <Th>Cantidad</Th>
+            <Th>Fecha</Th>
+          </THead>
+          <tbody>
+            {movements.map((m) => (
+              <Tr key={m.id}>
+                <Td>
+                  <span className="text-ink">{m.type}</span>
+                  {(m.reference || m.reason) && (
+                    <span className="text-ink-3"> · {m.reference ?? m.reason}</span>
+                  )}
+                </Td>
+                <Td className={m.delta >= 0 ? "font-medium text-green-700" : "font-medium text-orange-700"}>
+                  {m.delta >= 0 ? "+" : ""}{m.delta}
+                </Td>
+                <Td className="text-ink-2">{m.created_at.slice(0, 10)}</Td>
+              </Tr>
+            ))}
+            {movements.length === 0 && (
+              <Tr><Td colSpan={3} className="py-8 text-center text-ink-3">Sin movimientos aún.</Td></Tr>
+            )}
+          </tbody>
+        </Table>
+      </section>
     </div>
   );
 }
