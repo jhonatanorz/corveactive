@@ -1,5 +1,3 @@
-export type Line = "MOVE" | "HIM";
-
 export type ProductStatus = "draft" | "active" | "hidden";
 
 export type OrderStatus =
