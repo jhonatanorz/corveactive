@@ -1,3 +1,6 @@
+import { slugify } from "@/domain/slugify";
+import { parsePesosInput } from "@/domain/money";
+
 /**
  * RFC-4180 CSV tokenizer. Returns rows of raw (untrimmed) cell strings,
  * including the header row at index 0. Handles quoted fields (commas, quotes,
@@ -59,9 +62,6 @@ export function parseCsv(text: string): string[][] {
   if (cell !== "" || row.length > 0) pushRow();
   return rows;
 }
-
-import { slugify } from "@/domain/slugify";
-import { parsePesosInput } from "@/domain/money";
 
 export type RowError = { row: number; field?: string; message: string };
 

@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseCsv } from "@/lib/admin/product-csv";
-import { validateImport, type ImportLookups } from "@/lib/admin/product-csv";
+import { parseCsv, validateImport, type ImportLookups } from "@/lib/admin/product-csv";
 
 describe("parseCsv", () => {
   it("parses a simple header + rows", () => {
