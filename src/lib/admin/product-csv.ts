@@ -210,16 +210,16 @@ export function validateImport(text: string, lookups: ImportLookups): ValidateRe
       continue;
     }
 
-    const key = name.toLowerCase();
+    // Product identity is (name, line, category): rows only roll up into the same
+    // product when all three match. A repeated name under a different line or
+    // category is a separate product, not a conflict.
+    const key = `${name.toLowerCase()}|${line_id}|${category_id}`;
     const existingGroup = groups.get(key);
     if (existingGroup) {
       const p = existingGroup.product;
-      if (
-        p.line_id !== line_id ||
-        p.category_id !== category_id ||
-        p.price !== price ||
-        p.description !== description
-      ) {
+      // line/category are part of the key (always equal here); price/description
+      // are still product-level and must be consistent across the product's rows.
+      if (p.price !== price || p.description !== description) {
         errors.push({
           row: fileRow,
           message: "Datos del producto inconsistentes con una fila anterior del mismo producto.",

@@ -162,15 +162,37 @@ describe("validateImport", () => {
     if (!r.ok) expect(r.errors.some((e) => e.field === "name")).toBe(true);
   });
 
-  it("errors when same-name rows disagree on a product-level field", () => {
+  it("errors when same name+line+category rows disagree on price/description", () => {
     const csv = [
       header,
       "X,MOVE,leggings,10,Negro,M,",
-      "X,MOVE,leggings,20,Azul,M,", // price differs
+      "X,MOVE,leggings,20,Azul,M,", // same identity, price differs
     ].join("\n");
     const r = validateImport(csv, lookups);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors[0].row).toBe(3);
+  });
+
+  it("treats the same name under a different line as a separate product", () => {
+    const csv = [
+      header,
+      "Camiseta,MOVE,leggings,10,Negro,M,",
+      "Camiseta,HIM,leggings,10,Negro,M,", // same name+category, different line
+    ].join("\n");
+    const r = validateImport(csv, lookups);
+    expect(r.ok).toBe(true);
+    expect(r.counts).toEqual({ products: 2, variants: 2 });
+  });
+
+  it("treats the same name+line under a different category as a separate product", () => {
+    const csv = [
+      header,
+      "Camiseta,MOVE,leggings,10,Negro,M,",
+      "Camiseta,MOVE,tops,10,Negro,M,", // same name+line, different category
+    ].join("\n");
+    const r = validateImport(csv, lookups);
+    expect(r.ok).toBe(true);
+    expect(r.counts).toEqual({ products: 2, variants: 2 });
   });
 
   it("errors on a duplicate (name,color,size) within the file", () => {
