@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart/CartContext";
 import { availableByColor, type AvailVariant } from "@/domain/availability";
-import { pickProductImage, type ImageChoice } from "@/domain/product-image";
+import { pickProductImage, imagesForColor, type ImageChoice } from "@/domain/product-image";
 import type { ColorOption } from "@/domain/product-colors";
 import { formatMXN } from "@/domain/money";
 import { Button, Eyebrow, FadeImage, FloatingBar } from "@/components/ui";
@@ -34,6 +34,7 @@ export default function ProductDetailClient({ productId, productName, price, lin
 
   const sizes = byColor.find((c) => c.color === color)?.sizes ?? [];
   const chosen = variants.find((v) => v.color === color && v.size === size);
+  const gallery = imagesForColor(images, color);
 
   useEffect(() => {
     if (!added) return;
@@ -49,10 +50,6 @@ export default function ProductDetailClient({ productId, productName, price, lin
   }
   function selectThumb(img: ImageChoice) {
     setActiveUrl(img.url);
-    if (img.color) {
-      setColor(img.color);
-      setSize("");
-    }
   }
 
   return (
@@ -62,9 +59,9 @@ export default function ProductDetailClient({ productId, productName, price, lin
         <div className="order-1 md:order-2 relative aspect-[3/4] md:flex-1 md:self-start bg-mist overflow-hidden">
           <FadeImage src={activeUrl} alt={productName} sizes="(min-width:768px) 40vw, 100vw" />
         </div>
-        {images.length > 1 && (
+        {gallery.length > 1 && (
           <div className="order-2 md:order-1 flex md:flex-col gap-2 p-3 md:p-0 overflow-x-auto md:overflow-visible">
-            {images.map((img) => (
+            {gallery.map((img) => (
               <button
                 key={img.url}
                 type="button"
