@@ -142,6 +142,9 @@ export async function reorderImages(
   orderedIds: string[],
 ): Promise<void> {
   const supabase = await createClient();
+  // Sequential per-id updates: intermediate duplicate sort_order values are safe
+  // because there is no unique constraint on (product_id, color, sort_order). If
+  // such a constraint is ever added, this must become a single batched update.
   for (let i = 0; i < orderedIds.length; i++) {
     let q = supabase
       .from("product_images")

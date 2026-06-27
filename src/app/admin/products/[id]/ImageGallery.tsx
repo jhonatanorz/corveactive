@@ -55,7 +55,7 @@ export default function ImageGallery({
   return (
     <div className="space-y-4">
       {groups.map((g) => (
-        <div key={g.label} className="space-y-1.5">
+        <div key={g.color ?? "__default__"} className="space-y-1.5">
           <div className="text-[11px] font-medium text-ink-2">{g.label}</div>
           <div className="flex flex-wrap gap-3">
             {g.images.map((img, index) => (
